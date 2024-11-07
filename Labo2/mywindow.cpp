@@ -174,6 +174,21 @@ void MyWindow::on_pushButtonLogin_clicked()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void MyWindow::on_pushButtonAfficheFichier_clicked()
 {
-  // TO DO
+  videTableUtilisateurs(); 
+
+  UTILISATEUR vecteur[100];
+
+  int nbrUser = listeUtilisateurs(vecteur); 
+
+  if(nbrUser == -1)
+  {
+    perror("impossible de lire le fichier");
+    return ; 
+  }
+
+  for(int i=0; i<nbrUser;i++)
+  {
+    ajouteTupleTableUtilisateurs(vecteur[i].nom, vecteur[i].hash);
+  }
   printf("Clic sur bouton AFFICHER\n");
 }
