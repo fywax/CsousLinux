@@ -1,3 +1,8 @@
+#include <fcntl.h>      
+#include <sys/types.h>
+#include <sys/stat.h>  
+#include <stdio.h>      
+#include <stdlib.h>    
 #include <unistd.h>
 #include "mainwindowex3.h"
 #include "ui_mainwindowex3.h"
@@ -139,6 +144,22 @@ const char* MainWindowEx3::getGroupe3()
 
 void MainWindowEx3::on_pushButtonLancerRecherche_clicked()
 {
+    // Ouvrir ou créer le fichier Trace.log
+    int trace = open("Trace.log", O_CREAT | O_WRONLY | O_APPEND, 0644);
+    if (trace == -1)
+    {
+      perror("Erreur lors de l'ouverture de Trace.log");
+      exit(EXIT_FAILURE);
+    }
+
+    // Rediriger stderr vers le fichier log
+    if (dup2(trace, STDERR_FILENO) == -1)
+    {
+      perror("Erreur lors de la redirection de stderr");
+      ::close(trace);
+      exit(EXIT_FAILURE);
+    }
+
     fprintf(stderr, "Clic sur le bouton Lancer Recherche\n");
 
     pid_t Fils1, Fils2, Fils3, Pere;
@@ -148,16 +169,16 @@ void MainWindowEx3::on_pushButtonLancerRecherche_clicked()
     {
       if ((Fils1 = fork()) == -1)
       {
-          perror("Erreur lors de fork()");
-          exit(0);
+        perror("Erreur lors de fork()");
+        exit(0);
       }
 
       if (Fils1 == 0) // Processus fils
       {
-          fprintf(stderr, "Groupe : %s\n", getGroupe1());
-          execl("./Lecture", "Lecture", getGroupe1(), NULL);
-          perror("Erreur lors de execl()"); // Si execl échoue
-          exit(EXIT_FAILURE);
+        fprintf(stderr, "Groupe : %s\n", getGroupe1());
+        execl("./Lecture", "Lecture", getGroupe1(), NULL);
+        perror("Erreur lors de execl()"); // Si execl échoue
+        exit(EXIT_FAILURE);
       }
     }
 
@@ -165,16 +186,16 @@ void MainWindowEx3::on_pushButtonLancerRecherche_clicked()
     {
       if ((Fils2 = fork()) == -1)
       {
-          perror("Erreur lors de fork()");
-          exit(0);
+        perror("Erreur lors de fork()");
+        exit(0);
       }
 
       if (Fils2 == 0) // Processus fils
       {
-          fprintf(stderr, "Groupe : %s\n", getGroupe2());
-          execl("./Lecture", "Lecture", getGroupe2(), NULL);
-          perror("Erreur lors de execl()"); // Si execl échoue
-          exit(EXIT_FAILURE);
+        fprintf(stderr, "Groupe : %s\n", getGroupe2());
+        execl("./Lecture", "Lecture", getGroupe2(), NULL);
+        perror("Erreur lors de execl()"); // Si execl échoue
+        exit(EXIT_FAILURE);
       }
     }
 
@@ -182,16 +203,16 @@ void MainWindowEx3::on_pushButtonLancerRecherche_clicked()
     {
       if ((Fils3 = fork()) == -1)
       {
-          perror("Erreur lors de fork()");
-          exit(0);
+        perror("Erreur lors de fork()");
+        exit(0);
       }
 
       if (Fils3 == 0) // Processus fils
       {
-          fprintf(stderr, "Groupe : %s\n", getGroupe3());
-          execl("./Lecture", "Lecture", getGroupe3(), NULL);
-          perror("Erreur lors de execl()"); // Si execl échoue
-          exit(EXIT_FAILURE);
+        fprintf(stderr, "Groupe : %s\n", getGroupe3());
+        execl("./Lecture", "Lecture", getGroupe3(), NULL);
+        perror("Erreur lors de execl()"); // Si execl échoue
+        exit(EXIT_FAILURE);
       }
     }
 
@@ -199,19 +220,19 @@ void MainWindowEx3::on_pushButtonLancerRecherche_clicked()
     {
         if (WIFEXITED(status)) // Vérifier si le fils s'est terminé normalement
         {
-            fprintf(stderr, "Fils avec PID %d terminé avec le code : %d\n", Pere, WEXITSTATUS(status));
+          fprintf(stderr, "Fils avec PID %d terminé avec le code : %d\n", Pere, WEXITSTATUS(status));
 
-            // Associer le code de sortie au bon groupe
-            if (Pere == Fils1)
-                setResultat1(WEXITSTATUS(status));
-            else if (Pere == Fils2)
-                setResultat2(WEXITSTATUS(status));
-            else if (Pere == Fils3)
-                setResultat3(WEXITSTATUS(status));
+          // Associer le code de sortie au bon groupe
+          if (Pere == Fils1)
+              setResultat1(WEXITSTATUS(status));
+          else if (Pere == Fils2)
+              setResultat2(WEXITSTATUS(status));
+          else if (Pere == Fils3)
+              setResultat3(WEXITSTATUS(status));
         }
         else
         {
-            fprintf(stderr, "Fils avec PID %d terminé de manière anormale\n", Pere);
+          fprintf(stderr, "Fils avec PID %d terminé de manière anormale\n", Pere);
         }
     }
 
