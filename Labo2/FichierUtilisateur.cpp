@@ -11,7 +11,7 @@ int estPresent(const char* nom) {
     UTILISATEUR user1;
 
     // Ouvre le fichier en mode lecture seule
-    fd = open(FICHIER_UTILISATEURS, O_RDONLY);
+    fd = open(FICHIER_UTILISATEURS, O_RDONLY | O_CREAT, 0644);
     if (fd == -1) {
         perror("Le fichier n'existe pas");
         // Si le fichier n'existe pas, retourne -1
