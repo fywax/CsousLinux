@@ -150,6 +150,9 @@ void MainWindowEx4::on_pushButtonDemarrerTraitements_clicked()
 {
   fprintf(stderr,"Clic sur le bouton Demarrer Traitements\n");
   // TO DO
+  int val;
+  fprintf(stderr, "Caca\n");
+
 }
 
 void MainWindowEx4::on_pushButtonVider_clicked()

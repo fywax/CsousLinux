@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include "mainwindowex3.h"
 #include "ui_mainwindowex3.h"
- #include <sys/wait.h>
+#include <sys/wait.h>
 
 MainWindowEx3::MainWindowEx3(QWidget *parent):QMainWindow(parent),ui(new Ui::MainWindowEx3)
 {
@@ -146,6 +146,7 @@ void MainWindowEx3::on_pushButtonLancerRecherche_clicked()
 {
     // Ouvrir ou créer le fichier Trace.log
     int trace = open("Trace.log", O_CREAT | O_WRONLY | O_APPEND, 0644);
+
     if (trace == -1)
     {
       perror("Erreur lors de l'ouverture de Trace.log");
@@ -176,9 +177,11 @@ void MainWindowEx3::on_pushButtonLancerRecherche_clicked()
       if (Fils1 == 0) // Processus fils
       {
         fprintf(stderr, "Groupe : %s\n", getGroupe1());
-        execl("./Lecture", "Lecture", getGroupe1(), NULL);
-        perror("Erreur lors de execl()"); // Si execl échoue
-        exit(EXIT_FAILURE);
+        if(execl("./Lecture", "Lecture", getGroupe1(), NULL)==-1)
+        {
+          perror("Erreur lors de execl()"); // Si execl échoue
+          exit(0);
+        }
       }
     }
 

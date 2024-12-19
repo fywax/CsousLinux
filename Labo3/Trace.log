@@ -114,3 +114,91 @@ Tous les champs ont été vidés.
 Clic sur le bouton Vider
 Tous les champs ont été vidés.
 Clic sur le bouton Quitter
+Clic sur le bouton Lancer Recherche
+Groupe : g2202
+Lecture pour le groupe g2202
+(4686) g2202  (attend 6 secondes)
+Fils avec PID 4686 terminé avec le code : 6
+---6---
+Tous les fils ont terminé.
+Clic sur le bouton Vider
+Tous les champs ont été vidés.
+Clic sur le bouton Quitter
+Clic sur le bouton Lancer Recherche
+Groupe : g2202
+Groupe : g2201
+Groupe : g2203
+Lecture pour le groupe g2203
+Lecture pour le groupe g2202
+Lecture pour le groupe g2201
+(3112) g2201  (attend 10 secondes)
+(3113) g2203  (attend 8 secondes)
+(3111) g2202  (attend 6 secondes)
+Fils avec PID 3111 terminé avec le code : 6
+---6---
+Fils avec PID 3113 terminé avec le code : 8
+---8---
+Fils avec PID 3112 terminé avec le code : 10
+---10---
+Tous les fils ont terminé.
+Clic sur le bouton Vider
+Tous les champs ont été vidés.
+Clic sur le bouton Quitter
+Clic sur le bouton Lancer Recherche
+Tous les fils ont terminé.
+Clic sur le bouton Lancer Recherche
+Tous les fils ont terminé.
+Clic sur le bouton Lancer Recherche
+Groupe : g2203
+Lecture pour le groupe g2203
+(3100) g2203  (attend 8 secondes)
+Fils avec PID 3100 terminé avec le code : 8
+---8---
+Tous les fils ont terminé.
+Clic sur le bouton Lancer Recherche
+Groupe : g2204
+Lecture pour le groupe g2204
+Groupe : g2202
+Groupe : g2203
+Lecture pour le groupe g2203
+Lecture pour le groupe g2202
+(4048) g2204  (attend 6 secondes)
+(4047) g2203  (attend 8 secondes)
+(4046) g2202  (attend 6 secondes)
+Fils avec PID 4048 terminé avec le code : 6
+---6---
+Fils avec PID 4046 terminé avec le code : 6
+---6---
+Fils avec PID 4047 terminé avec le code : 8
+---8---
+Tous les fils ont terminé.
+Clic sur le bouton Lancer Recherche
+Groupe : g2204
+Groupe : g2201
+Groupe : g2201
+Lecture pour le groupe g2201
+Lecture pour le groupe g2204
+Lecture pour le groupe g2201
+(4154) g2204  (attend 6 secondes)
+(4153) g2201  (attend 10 secondes)
+(4152) g2201  (attend 10 secondes)
+Fils avec PID 4154 terminé avec le code : 6
+---6---
+Fils avec PID 4153 terminé avec le code : 10
+---10---
+Fils avec PID 4152 terminé avec le code : 10
+---10---
+Tous les fils ont terminé.
+Clic sur le bouton Lancer Recherche
+Groupe : g2201
+Lecture pour le groupe g2201
+Groupe : g2202
+Lecture pour le groupe g2202
+(4247) g2201  (attend 10 secondes)
+(4248) g2202  (attend 6 secondes)
+Fils avec PID 4248 terminé avec le code : 6
+---6---
+Fils avec PID 4247 terminé avec le code : 10
+---10---
+Tous les fils ont terminé.
+Clic sur le bouton Quitter
