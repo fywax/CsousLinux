@@ -13,11 +13,12 @@
 #include <unistd.h>
 #include "protocole.h" // contient la cle et la structure d'un message
 
-int idQ,idShm,idSem, filsC;
+int idQ,idShm,idSem, filsCaddie;
 int fdPipe[2];
 TAB_CONNEXIONS *tab;
 
 void afficheTab();
+void reponseLogin(int expediteur, int data1, char data4[100]);
 
 typedef struct
 {
@@ -28,6 +29,8 @@ typedef struct
 int main()
 {
   CLIENT client;
+  int fd;
+  char msg[100];
   // Armement des signaux
   // TO DO
 
@@ -91,6 +94,7 @@ int main()
                       }
 
                       fprintf(stderr,"(SERVEUR %d) Requete CONNECT reçue de %d\n",getpid(),m.expediteur);
+                      afficheTab();
                       break;
 
       case DECONNECT : // TO DO
@@ -103,31 +107,110 @@ int main()
                           }
                       }
                       fprintf(stderr,"(SERVEUR %d) Requete DECONNECT reçue de %d\n",getpid(),m.expediteur);
+                      afficheTab();
                       break;
 
       case LOGIN :    // TO DO
-                      if(m.data1 == 1)//nouveau client
+                      fprintf(stderr,"(SERVEUR %d) Requete LOGIN reçue de %d : --%d--%s--%s--\n",getpid(),m.expediteur,m.data1,m.data2,m.data3);
+
+
+                      if(m.data1 == 1) //nouveau client
                       {
                         strcpy(client.nom, m.data2);
                         strcpy(client.motDePasse, m.data3);
 
-                        if((fd = open("clients.dat",O_WRONLY|O_APPEND)) == -1)
+                        if((fd = open("clients.dat",O_WRONLY|O_APPEND | O_CREAT, 0644)) == -1)
                         {
                           fprintf(stderr, "Probleme d'ouverture de fichier!\n");
                           strcpy(msg,"Probleme d'ouverture de fichier!");
                           reponseLogin(m.expediteur, 0, msg);
                         }
-
                         else
                         {
-
+                          write(fd, &client, sizeof(CLIENT));
+                          close(fd);
+                          strcpy(msg, "Utilisateur créé avec succès");
+                          for(int i=0;i<6;i++)
+                          {
+                            if(tab->connexions[i].pidFenetre == m.expediteur) 
+                            {
+                              strcpy(tab->connexions[i].nom, m.data2);
+                              break;
+                            }
+                            
+                          }
+                          reponseLogin(m.expediteur, 1, msg);
                         }
                       }
-                      fprintf(stderr,"(SERVEUR %d) Requete LOGIN reçue de %d : --%d--%s--%s--\n",getpid(),m.expediteur,m.data1,m.data2,m.data3);
+                      else //pas nv client
+                      {
+                        if((fd = open("clients.dat",O_RDONLY)) == -1)
+                        {
+                          fprintf(stderr, "Probleme d'ouverture de fichier!\n");
+                          strcpy(msg,"Probleme d'ouverture de fichier!");
+                          reponseLogin(m.expediteur, 0, msg);
+                        }
+                        else
+                        {
+                          CLIENT tempClient;
+                          bool found = false;
+
+                          while (read(fd, &tempClient, sizeof(CLIENT)) == sizeof(CLIENT)) 
+                          {
+                              if (strcmp(tempClient.nom, m.data2) == 0)
+                              {
+                                  found = true;
+
+                                  // Vérification du mot de passe
+                                  if (strcmp(tempClient.motDePasse, m.data3) == 0) 
+                                  {
+                                      strcpy(msg, "Connexion réussie");
+                                      for(int i=0;i<6;i++)
+                                      {
+                                        if(tab->connexions[i].pidFenetre == m.expediteur) 
+                                        {
+                                          strcpy(tab->connexions[i].nom, m.data2);
+                                          break;
+                                        }
+                                        
+                                      }
+                                      close(fd);
+                                      reponseLogin(m.expediteur, 1, msg);
+                                  } 
+
+                                  else 
+                                  {
+                                      strcpy(msg, "Mot de passe incorrect");
+                                      close(fd);
+                                      reponseLogin(m.expediteur, 0, msg);
+                                  }
+
+                                  break; // Utilisateur trouvé, on quitte la boucle
+                              }
+                          }
+
+                          if (!found) // Utilisateur non trouvé
+                          {
+                            strcpy(msg, "Utilisateur introuvable");
+                            close(fd);
+                            reponseLogin(m.expediteur, 0, msg);
+                          }
+                        }
+                      }
+                      afficheTab();
                       break; 
 
       case LOGOUT :   // TO DO
                       fprintf(stderr,"(SERVEUR %d) Requete LOGOUT reçue de %d\n",getpid(),m.expediteur);
+                      for(int i = 0; i < 6; i++)
+                      {
+                        if(tab->connexions[i].pidFenetre == m.expediteur) 
+                        {
+                          strcpy(tab->connexions[i].nom,"");                          
+                          break;
+                        }
+                      }
+                      afficheTab();
                       break;
 
       case UPDATE_PUB :  // TO DO
@@ -161,7 +244,7 @@ int main()
                       fprintf(stderr,"(SERVEUR %d) Requete NEW_PUB reçue de %d\n",getpid(),m.expediteur);
                       break;
     }
-    afficheTab();
+    //afficheTab();
   }
 }
 
@@ -177,3 +260,24 @@ void afficheTab()
   fprintf(stderr,"\n");
 }
 
+void reponseLogin(int expediteur, int data1, char data4[100])
+{
+  MESSAGE reponse;
+
+  reponse.expediteur = getpid();
+  reponse.requete = LOGIN;
+  reponse.type = expediteur;
+  reponse.data1 = data1;
+  strcpy(reponse.data4, data4);
+
+  if(msgsnd(idQ, &reponse, sizeof(MESSAGE) - sizeof(long),0) == -1)
+  {
+    perror("Erreur de msgsnd : 2\n");
+  }
+  else
+  {
+    printf("(Serveur %d) réponse envoyée\n", getpid());
+  }
+
+  kill(reponse.type, SIGUSR1);
+}

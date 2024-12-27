@@ -65,6 +65,16 @@ WindowClient::WindowClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::Wi
 
     // Armement des signaux
     // TO DO
+    struct sigaction A;
+    A.sa_handler = handlerSIGUSR1;
+    sigemptyset(&A.sa_mask);
+    A.sa_flags = 0;
+
+     if (sigaction(SIGUSR1,&A,NULL) ==-1)
+     {
+     perror("Erreur de sigaction");
+     exit(1);
+     }
 
     // Envoi d'une requete de connexion au serveur
     // TO DO
@@ -74,7 +84,7 @@ WindowClient::WindowClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::Wi
 
     if(msgsnd(idQ, &m, sizeof(MESSAGE) - sizeof(long),0) == -1)
     {
-      perror("Erreur de msgsnd\n");
+      perror("Erreur de msgsnd : 3\n");
     }
     else
     {
@@ -326,7 +336,7 @@ void WindowClient::closeEvent(QCloseEvent *event)
 
     if(msgsnd(idQ, &m, sizeof(MESSAGE) - sizeof(long),0) == -1)
     {
-      perror("Erreur de msgsnd\n");
+      perror("Erreur de msgsnd : 4\n");
     }
     else
     {
@@ -346,9 +356,20 @@ void WindowClient::on_pushButtonLogin_clicked()
 {
     // Envoi d'une requete de login au serveur
     // TO DO
-   m.data2 = getNom();
-   m.data3 = getMotDePasse();
+   strcpy(m.data2, getNom());
+   strcpy(m.data3, getMotDePasse());
    m.data1 = isNouveauClientChecked(); //1 si nv client
+   m.requete = LOGIN;
+
+   if(msgsnd(idQ, &m, sizeof(MESSAGE) - sizeof(long),0) == -1)
+    {
+      perror("Erreur de msgsnd : 1\n");
+    }
+    else
+    {
+      printf("Requête bien envoyée au serveur\n");
+    }
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -359,6 +380,19 @@ void WindowClient::on_pushButtonLogout_clicked()
 
     // Envoi d'une requete de logout au serveur
     // TO DO
+    m.type = 1;
+    m.requete = LOGOUT;
+    m.expediteur = getpid();
+
+    if(msgsnd(idQ, &m, sizeof(MESSAGE) - sizeof(long),0) == -1)
+    {
+      perror("Erreur de msgsnd : 1\n");
+    }
+    else
+    {
+      logoutOK();
+      printf("Requête bien envoyée au serveur\n");
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -440,6 +474,16 @@ void handlerSIGUSR1(int sig)
       switch(m.requete)
       {
         case LOGIN :
+                    if(m.data1 == 0)
+                    {
+                      w->dialogueErreur("Erreur de login", m.data4);
+                    }
+
+                    else
+                    {
+                        w->dialogueMessage("Login", m.data4);
+                        w->loginOK();
+                    }
                     break;
 
         case CONSULT : // TO DO (étape 3)
