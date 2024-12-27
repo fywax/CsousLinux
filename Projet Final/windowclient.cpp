@@ -14,6 +14,7 @@ using namespace std;
 #include <signal.h>
 
 extern WindowClient *w;
+MESSAGE m;
 
 int idQ, idShm;
 bool logged;
@@ -45,8 +46,15 @@ WindowClient::WindowClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::Wi
     ui->tableWidgetPanier->horizontalHeader()->setStyleSheet("background-color: lightyellow");
 
     // Recuperation de l'identifiant de la file de messages
-    //fprintf(stderr,"(CLIENT %d) Recuperation de l'id de la file de messages\n",getpid());
+    fprintf(stderr,"(CLIENT %d) Recuperation de l'id de la file de messages\n",getpid());
+
     // TO DO
+    if ((idQ = msgget(CLE,0)) == -1)
+    {
+      perror("Erreur de msgget");
+    }
+
+    //printf("idQ = %d\n",idQ); //Pour voir ID de la file de message
 
     // Recuperation de l'identifiant de la mémoire partagée
     //fprintf(stderr,"(CLIENT %d) Recuperation de l'id de la mémoire partagée\n",getpid());
@@ -60,11 +68,23 @@ WindowClient::WindowClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::Wi
 
     // Envoi d'une requete de connexion au serveur
     // TO DO
+    m.expediteur = getpid();
+    m.requete = CONNECT;
+    m.type = 1;
+
+    if(msgsnd(idQ, &m, sizeof(MESSAGE) - sizeof(long),0) == -1)
+    {
+      perror("Erreur de msgsnd\n");
+    }
+    else
+    {
+      printf("Connexion réussie\n");
+    }
 
     // Exemples à supprimer
-    setPublicite("Promotions sur les concombres !!!");
-    setArticle("pommes",5.53,18,"pommes.jpg");
-    ajouteArticleTablePanier("cerises",8.96,2);
+//    setPublicite("Promotions sur les concombres !!!");
+//    setArticle("pommes",5.53,18,"pommes.jpg");
+//    ajouteArticleTablePanier("cerises",8.96,2);'
 }
 
 WindowClient::~WindowClient()
@@ -300,7 +320,18 @@ void WindowClient::closeEvent(QCloseEvent *event)
 {
   // TO DO (étape 1)
   // Envoi d'une requete DECONNECT au serveur
+    m.expediteur = getpid();
+    m.requete = DECONNECT;
+    m.type = 1;
 
+    if(msgsnd(idQ, &m, sizeof(MESSAGE) - sizeof(long),0) == -1)
+    {
+      perror("Erreur de msgsnd\n");
+    }
+    else
+    {
+      printf("Déconnexion réussie\n");
+    }
   // envoi d'un logout si logged
 
   // Envoi d'une requete de deconnexion au serveur
@@ -315,6 +346,9 @@ void WindowClient::on_pushButtonLogin_clicked()
 {
     // Envoi d'une requete de login au serveur
     // TO DO
+   m.data2 = getNom();
+   m.data3 = getMotDePasse();
+   m.data1 = isNouveauClientChecked(); //1 si nv client
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////

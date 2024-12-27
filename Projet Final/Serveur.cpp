@@ -13,14 +13,21 @@
 #include <unistd.h>
 #include "protocole.h" // contient la cle et la structure d'un message
 
-int idQ,idShm,idSem;
+int idQ,idShm,idSem, filsC;
 int fdPipe[2];
 TAB_CONNEXIONS *tab;
 
 void afficheTab();
 
+typedef struct
+{
+  char  nom[20];
+  char motDePasse[20];
+} CLIENT;
+
 int main()
 {
+  CLIENT client;
   // Armement des signaux
   // TO DO
 
@@ -74,13 +81,48 @@ int main()
     switch(m.requete)
     {
       case CONNECT :  // TO DO
+                      for(int i = 0; i<6; i++)
+                      {
+                        if(tab->connexions[i].pidFenetre == 0)
+                        {
+                          tab->connexions[i].pidFenetre = m.expediteur;
+                          i = 6;
+                        }
+                      }
+
                       fprintf(stderr,"(SERVEUR %d) Requete CONNECT reçue de %d\n",getpid(),m.expediteur);
                       break;
 
       case DECONNECT : // TO DO
+                      for(int i = 0; i < 6; i++)
+                      {
+                        if(tab->connexions[i].pidFenetre == m.expediteur)
+                          {
+                            tab->connexions[i].pidFenetre =  0;
+                            i = 6;
+                          }
+                      }
                       fprintf(stderr,"(SERVEUR %d) Requete DECONNECT reçue de %d\n",getpid(),m.expediteur);
                       break;
+
       case LOGIN :    // TO DO
+                      if(m.data1 == 1)//nouveau client
+                      {
+                        strcpy(client.nom, m.data2);
+                        strcpy(client.motDePasse, m.data3);
+
+                        if((fd = open("clients.dat",O_WRONLY|O_APPEND)) == -1)
+                        {
+                          fprintf(stderr, "Probleme d'ouverture de fichier!\n");
+                          strcpy(msg,"Probleme d'ouverture de fichier!");
+                          reponseLogin(m.expediteur, 0, msg);
+                        }
+
+                        else
+                        {
+
+                        }
+                      }
                       fprintf(stderr,"(SERVEUR %d) Requete LOGIN reçue de %d : --%d--%s--%s--\n",getpid(),m.expediteur,m.data1,m.data2,m.data3);
                       break; 
 

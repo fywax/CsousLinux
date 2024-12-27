@@ -1,3 +1,6 @@
+.SILENT:
+
+
 all: AccesBD Caddie Publicite CreationBD Serveur Gerant Client
 
 AccesBD: AccesBD.cpp
